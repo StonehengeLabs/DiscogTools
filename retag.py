@@ -18,21 +18,28 @@ collection = Collection(file_path_collection_json)
 djcase = DjCase(dir_path_vinyl)
 
 if len(sys.argv) < 2:
-    print("Usage: retag.py <release-id> [<copynote>]")
+    print("Usage: retag.py <release-id>")
     exit(1)
 
 release_id = int(sys.argv[1])
 copies = collection.copies_by_release_id(release_id)
 
 if len(copies) > 1:
-    if len(sys.argv) < 3:
-        for copy in copies:
-            print("Match: " + copy.formatted())
-        print("\nMore than one copy of this release; need to specify a copynote.")
-        print("Usage: retag.py <release-id> [<copynote>]")
+    print('\n--- More than one copy of this release: ---')
+    copynotes = []
+    for i in range(0, len(copies)):
+        print(f'({i + 1}) {copies[i].copynote}')
+        copynotes.append(copies[i].copynote)
+    command = input('\nSelect a copy: ')
+    copy_index = None
+    if re.match('\d+', command):
+        i = int(command) - 1
+        if i >= 0 and i < len(copies):
+            copy_index = i
+    if copy_index == None:
+        print("Invalid selection.")
         exit(1)
-    copynote = sys.argv[2]
-    copies = collection.copies_by_release_id(release_id, copynote)
+    copies = collection.copies_by_release_id(release_id, copynotes[copy_index])
 
 if not len(copies) == 1:
     print('Copy matching failed.')
