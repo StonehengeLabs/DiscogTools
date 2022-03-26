@@ -16,6 +16,10 @@ class Copy:
             else:
                 self.recorded_tracks.append(track)
 
+        self.copynote_string_component = '' # self.copynote with a leading space if there is a copynote (convenient for string composition).
+        if self.copynote:
+            self.copynote_string_component = ' ' + self.copynote
+
     def formatted(self):
         return f'{self.release.formatted()}\n   {self.copynote} / {self.folder} / {self.fullnote}'
 
