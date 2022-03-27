@@ -7,6 +7,7 @@ import glob
 from collection import Collection
 from djcase import DjCase
 from mp3file import Mp3File
+from filematcher import FileMatcher
 
 # pip install mutagen
 from mutagen.id3 import ID3
