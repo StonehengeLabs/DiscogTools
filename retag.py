@@ -75,7 +75,7 @@ while True:
     for i in range(0, len(track_filenames_current)):
         print(f'({i + 1}) {track_filenames_current[i]}')
 
-    command = input('\nEnter r to retag; track number to move a track to top; any other input to abort: ')
+    command = input('\nConfirm to retag; or track number to move a track to top; any other input to abort: ')
     if re.match('\d+', command):
         print('\n--- Reordered matches: ---')
         track_index = int(command) - 1
@@ -86,7 +86,7 @@ while True:
         remapped = True
         continue
 
-    if not command == 'r':
+    if not command == '':
         print("Aborted.")
         exit(0)
 
@@ -151,10 +151,11 @@ if renamed or remapped:
     for i in range(0, len(track_filenames_current)):
         matches = []
         while True:
-            matches = glob.glob(os.path.join(dir_path_work, f'{release_id} {track_positions_current[i]} *.wav'))
+            pattern = f'{release_id} {track_positions_current[i]} *.wav'
+            matches = glob.glob(os.path.join(dir_path_work, pattern))
             if len(matches) == 1:
                 break
-            print('\nPotential wav files (expected exactly one):')
+            print(f'Potential wav files (expected exactly one; pattern is "{pattern}"):')
             print(matches)
             command = input('\nFix and confirm...')
 
