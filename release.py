@@ -28,4 +28,4 @@ class Release:
         catext = ''
         if not copy.copynote == None:
             catext = ' ' + copy.copynote
-        return f'{self.release.catno}{catext} - {self.artist} - {self.title}.{ext}'
+        return f'{self.id}{catext} {self.title} ({self.catno}) - {self.artist}.{ext}'

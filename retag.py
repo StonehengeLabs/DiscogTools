@@ -20,7 +20,8 @@ from mutagen.id3 import TYER
 
 file_path_collection_json = 'C:/Portables/DiscogParser/collection.json'
 dir_path_vinyl = 'C:/Stefan/Static/DjCase/vinyl'
-dir_path_output = 'C:/Stefan/Dynamic/Scratch/Mp3Factory/retagged'
+dir_path_output_mp3 = 'C:/Stefan/Dynamic/Scratch/Mp3Factory/retagged'
+dir_path_output_wav = 'C:/Stefan/Dynamic/Scratch/Mp3Factory/source'
 dir_path_work = 'C:/Stefan/Dynamic/Scratch/Mp3Factory'
 
 collection = Collection(file_path_collection_json)
@@ -64,9 +65,10 @@ if len(unrecorded_positions) > 0:
     print('(-) Unrecorded positions: ' + ', '.join(unrecorded_positions))
 
 print('\n--- Closest matches: ---')
-track_filenames_current = []
+track_filenames_current, track_positions_current = [], []
 for track in copy.recorded_tracks:
     track_filenames_current.append(djcase.get_most_similar_filename(track.mp3_filename(copy)))
+    track_positions_current.append(track.position)
 
 renamed, remapped = False, False
 while True:
@@ -80,6 +82,7 @@ while True:
         if track_index < 1 or track_index >= len(track_filenames_current):
             continue
         track_filenames_current = [ track_filenames_current[track_index] ] + track_filenames_current[:track_index] + track_filenames_current[track_index + 1:]
+        track_positions_current = [ track_positions_current[track_index] ] + track_positions_current[:track_index] + track_positions_current[track_index + 1:]
         remapped = True
         continue
 
@@ -92,7 +95,7 @@ while True:
 for i in range(0, len(copy.recorded_tracks)):
     track = copy.recorded_tracks[i]
     filename_current, filename_corrected = track_filenames_current[i], track.mp3_filename(copy)
-    filepath_corrected = os.path.join(dir_path_output, filename_corrected)
+    filepath_corrected = os.path.join(dir_path_output_mp3, filename_corrected)
     print('    ' + filename_current + '\n -> ' + filename_corrected)
     shutil.copy(os.path.join(dir_path_vinyl, filename_current), filepath_corrected)
 
@@ -124,31 +127,42 @@ for i in range(0, len(copy.recorded_tracks)):
     tags.save()
 
 if renamed or remapped:
-    # Now we must adjust the .wav file names as well. Problem is that we know only the new name of the image name, not the old one.
-    # Therefore, we guess the old image name by using the release ID of the current (= old) file names.
+    # Now we must adjust the .jpg and .wav file names as well.
+    print('\nSources as well...\n')
     src_filenames_current, src_filenames_corrected = [], []
-    for i in range(0, len(copy.recorded_tracks)):
-        track = copy.recorded_tracks[i]
-        src_filenames_current  .append(track_filenames_current[i][:-4] + ".wav")
-        src_filenames_corrected.append(track.wav_filename(copy))
-    for i in range(0, len(copy.recorded_tracks) + 1): # Will add image file in first iteration (need 1st file present to guess image file name)
-        source = os.path.join(dir_path_work, src_filenames_current[i])
-        while not os.path.exists(source):
-            command = input(f"\nNeed to rename:\n    '{src_filenames_current[i]}'\nPlease get it and confirm...")
-        print(f'   {src_filenames_current[i]}\n')
-        print(f'-> {src_filenames_corrected[i]}\n')
-        shutil.move(source, os.path.join(dir_path_work, 'source', src_filenames_corrected[i]))
-        if i == 0: # Now that the source archive has probably been extracted and the sources are available, we can search & schedule the image file as well...
-            refs = re.match('(\d+)\s.+', src_filenames_current[0])
-            old_release_id = refs.group(1) # The old release ID is in fact likely to be the same as the new one, but you never know.
-            matches = glob.glob(os.path.join(dir_path_work, f'{old_release_id} *.jpg'))
+    release_id = copy.release.id # First guess: release ID is unchanged.
+
+    # Starting with .jpg...
+    matches = []
+    while True:
+        matches = glob.glob(os.path.join(dir_path_work, f'{release_id}*.jpg'))
+        if len(matches) == 1:
+            break
+        print('Potential image files (expected exactly one):')
+        print(matches)
+        command = input('\nGet the sources and confirm, or enter deviant old release ID: ')
+        if re.match('\d+', command):
+            release_id = int(command)
+
+    src_filenames_current.append(os.path.basename(matches[0]))
+    src_filenames_corrected.append(copy.release.img_filename(copy))
+
+    # Now .wav...
+    for i in range(0, len(track_filenames_current)):
+        matches = []
+        while True:
+            matches = glob.glob(os.path.join(dir_path_work, f'{release_id} {track_positions_current[i]} *.wav'))
+            if len(matches) == 1:
+                break
+            print('\nPotential wav files (expected exactly one):')
             print(matches)
-            if not len(matches) == 1:
-                print('Unplausible number of source image file matches: ')
-                print(matches)
-                exit(1)
-            src_filenames_current  .append(os.path.basename(matches[0]))
-            src_filenames_corrected.append(copy.release.img_filename(copy))
+            command = input('\nFix and confirm...')
 
-print(f"\nOutput folder is 'file:///{dir_path_output}'.")
+        src_filenames_current.append(os.path.basename(matches[0]))
+        src_filenames_corrected.append(copy.recorded_tracks[i].wav_filename(copy))
 
+    for i in range(0, len(src_filenames_current)):
+        print('    ' + src_filenames_current[i] + '\n -> ' + src_filenames_corrected[i])
+        shutil.move(os.path.join(dir_path_work, src_filenames_current[i]), os.path.join(dir_path_output_wav, src_filenames_corrected[i]))
+
+# print(f"\nOutput folder is 'file:///{dir_path_output_mp3}'.")
