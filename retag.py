@@ -2,7 +2,6 @@ import sys
 import re
 import os
 import shutil
-import glob
 
 from collection import Collection
 from djcase import DjCase
@@ -58,40 +57,16 @@ if not len(copies) == 1:
 
 copy = copies[0]
 print(copy.formatted())
-print('\n--- Tracks should be: ---')
-for i in range(0, len(copy.recorded_tracks)):
-    print(f'({i + 1}) {copy.recorded_tracks[i].mp3_filename(copy)}')
+
 unrecorded_positions = copy.unrecorded_positions()
 if len(unrecorded_positions) > 0:
-    print('(-) Unrecorded positions: ' + ', '.join(unrecorded_positions))
+    print('Unrecorded positions: ' + ', '.join(unrecorded_positions))
 
-print('\n--- Closest matches: ---')
-track_filenames_current, track_positions_current = [], []
+mp3_names_to_be = []
 for track in copy.recorded_tracks:
-    track_filenames_current.append(djcase.get_most_similar_filename(track.mp3_filename(copy)))
-    track_positions_current.append(track.position)
-
-renamed, remapped = False, False
-while True:
-    for i in range(0, len(track_filenames_current)):
-        print(f'({i + 1}) {track_filenames_current[i]}')
-
-    command = input('\nConfirm to retag; or track number to move a track to top; any other input to abort: ')
-    if re.match('\d+', command):
-        print('\n--- Reordered matches: ---')
-        track_index = int(command) - 1
-        if track_index < 1 or track_index >= len(track_filenames_current):
-            continue
-        track_filenames_current = [ track_filenames_current[track_index] ] + track_filenames_current[:track_index] + track_filenames_current[track_index + 1:]
-        track_positions_current = [ track_positions_current[track_index] ] + track_positions_current[:track_index] + track_positions_current[track_index + 1:]
-        remapped = True
-        continue
-
-    if not command == '':
-        print("Aborted.")
-        exit(0)
-
-    break
+    mp3_names_to_be.append(track.mp3_filename(copy))
+matcher = FileMatcher(copy.release.id, "MP3", mp3_names_to_be, dir_path_vinyl, '*.mp3')
+renamed, track_filenames_current = matcher.select()
 
 for i in range(0, len(copy.recorded_tracks)):
     track = copy.recorded_tracks[i]
@@ -127,41 +102,18 @@ for i in range(0, len(copy.recorded_tracks)):
 
     tags.save()
 
-if renamed or remapped:
+if renamed:
     # Now we must adjust the .jpg and .wav file names as well.
-    print('\nSources as well...\n')
+    print('\nSources as well...')
     src_filenames_current, src_filenames_corrected = [], []
-    release_id = copy.release.id # First guess: release ID is unchanged.
+    release_id = copy.release.id # Release ID is considered to be unchanged.
 
-    # Starting with .jpg...
-    matches = []
-    while True:
-        matches = glob.glob(os.path.join(dir_path_work, f'{release_id}*.jpg'))
-        if len(matches) == 1:
-            break
-        print('Potential image files (expected exactly one):')
-        print(matches)
-        command = input('\nGet the sources and confirm, or enter deviant old release ID: ')
-        if re.match('\d+', command):
-            release_id = int(command)
-
-    src_filenames_current.append(os.path.basename(matches[0]))
+    for track in copy.recorded_tracks:
+        src_filenames_corrected.append(track.wav_filename(copy))
     src_filenames_corrected.append(copy.release.img_filename(copy))
 
-    # Now .wav...
-    for i in range(0, len(track_filenames_current)):
-        matches = []
-        while True:
-            pattern = f'{release_id} {track_positions_current[i]} *.wav'
-            matches = glob.glob(os.path.join(dir_path_work, pattern))
-            if len(matches) == 1:
-                break
-            print(f'Potential wav files (expected exactly one; pattern is "{pattern}"):')
-            print(matches)
-            command = input('\nFix and confirm...')
-
-        src_filenames_current.append(os.path.basename(matches[0]))
-        src_filenames_corrected.append(copy.recorded_tracks[i].wav_filename(copy))
+    matcher = FileMatcher(copy.release.id, "Source", src_filenames_corrected, dir_path_work, '*.*')
+    renamed, src_filenames_current = matcher.select()
 
     for i in range(0, len(src_filenames_current)):
         print('    ' + src_filenames_current[i] + '\n -> ' + src_filenames_corrected[i])
