@@ -90,7 +90,9 @@ for i in range(0, len(copy.recorded_tracks)):
     tags['TCON'] = TCON(encoding=3, text=copy.release.genres[0])
     tags['TIT2'] = TIT2(encoding=3, text=track.title)
     tags['TPUB'] = TPUB(encoding=3, text=copy.release.label)
-    tags['TYER'] = TYER(encoding=3, text=copy.release.year)
+
+    if not copy.release.year == None:
+        tags['TYER'] = TYER(encoding=3, text=copy.release.year)
 
     tags.delall('COMM')
     tags['COMM'] = COMM(encoding=3, lang='eng', text=track.id3_comment(copy))
