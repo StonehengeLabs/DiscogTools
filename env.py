@@ -1,0 +1,6 @@
+file_path_collection_json = 'C:/Portables/DiscogParser/collection.json'
+file_path_mp3states_json = 'C:/Stefan/Static/DjCase/mp3states.json'
+dir_path_vinyl = 'C:/Stefan/Static/DjCase/vinyl'
+dir_path_output_mp3 = 'C:/Stefan/Dynamic/Scratch/Mp3Factory/retagged'
+dir_path_output_wav = 'C:/Stefan/Dynamic/Scratch/Mp3Factory/source'
+dir_path_work = 'C:/Stefan/Dynamic/Scratch/Mp3Factory'

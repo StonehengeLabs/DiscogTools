@@ -8,6 +8,8 @@ from djcase import DjCase
 from mp3file import Mp3File
 from filematcher import FileMatcher
 
+from env import *
+
 # pip install mutagen
 from mutagen.id3 import ID3
 from mutagen.id3 import TPE1
@@ -17,12 +19,6 @@ from mutagen.id3 import TCON
 from mutagen.id3 import TIT2
 from mutagen.id3 import TPUB
 from mutagen.id3 import TYER
-
-file_path_collection_json = 'C:/Portables/DiscogParser/collection.json'
-dir_path_vinyl = 'C:/Stefan/Static/DjCase/vinyl'
-dir_path_output_mp3 = 'C:/Stefan/Dynamic/Scratch/Mp3Factory/retagged'
-dir_path_output_wav = 'C:/Stefan/Dynamic/Scratch/Mp3Factory/source'
-dir_path_work = 'C:/Stefan/Dynamic/Scratch/Mp3Factory'
 
 collection = Collection(file_path_collection_json)
 djcase = DjCase(dir_path_vinyl)
@@ -100,7 +96,7 @@ for i in range(0, len(copy.recorded_tracks)):
     playcounts = tags.getall('TXXX')
     for p in playcounts:
         if p.desc == 'SERATO_PLAYCOUNT':
-            p.text = u'0'
+            p.text = [ u'0' ]
 
     tags.save()
 
