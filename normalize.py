@@ -16,6 +16,8 @@ def normalize_label(label):
 
 def normalize_title(title):
    title = title.replace("\"", "")
+   title = title.replace("“", "") # For release 21001810.
+   title = title.replace("”", "") # For release 21001810.
    title = title.replace(" / ", ", ")
    title = title.replace("Ω", "Ohm") # For release 892555.
    title = title.replace("•", ".") # For release 5550.
