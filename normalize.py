@@ -2,7 +2,7 @@ import re
 
 def normalize_artist(artist):
    if artist:
-      artist = re.sub('\s\(\d+\)', "", artist) # Not clear
+      artist = re.sub('\s\(\d+\)', "", artist) # This removes discogs indices. May be subject to discussion.
       artist = artist.strip()
       artist = artist.replace(" / ", ", ")
       artist = artist.replace("ā", "a") # For Prānā - boundless EP. This is not in the Latin-1 space.
@@ -15,7 +15,6 @@ def normalize_label(label):
    return normalize_artist(label) # Same rules, as it seems.
 
 def normalize_title(title):
-   title = title.replace("\"", "")
    title = title.replace("“", "") # For release 21001810.
    title = title.replace("”", "") # For release 21001810.
    title = title.replace(" / ", ", ")
@@ -26,13 +25,13 @@ def normalize_title(title):
    return title
 
 def normalize_catno(catno):
-   catno = catno.replace("\"", "")
    catno = catno.replace("П", "_")
    catno = catno.replace("•", ".")
    catno = catno.replace("₂", "2")
    return catno
 
 def NormalizeFileBaseName(name):
+   name = name.replace("\"", "")
    name = name.replace("?", "")
    name = name.replace("¿", "")
    name = name.replace("!", "")
