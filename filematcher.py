@@ -67,6 +67,12 @@ class FileMatcher:
         return [os.path.basename(x) for x in glob.glob(os.path.join(self.glob_path, self.glob_pattern))]
 
     def take_most_similar_filename(self, pattern, pool):
+        best_filename = FileMatcher.get_most_similar_filename(pattern, pool)
+        pool.remove(best_filename)
+        return best_filename
+
+    @staticmethod
+    def get_most_similar_filename(pattern, pool):
         best_distance = 1000000 # infinite
         best_filename = None
         for filename in pool:
@@ -74,5 +80,4 @@ class FileMatcher:
             if distance < best_distance:
                 best_distance = distance
                 best_filename = filename
-        pool.remove(best_filename)
         return best_filename

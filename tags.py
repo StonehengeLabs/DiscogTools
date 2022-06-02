@@ -22,6 +22,58 @@ def tags_set_all(copy, track, tags):
 
     tags_normalize_serato(tags)
 
+def tags_verify(copy, track, tags):
+    errors = []
+
+    generalMismatches = []
+    tagged_artist = tags['TPE1'].text[0]
+    tagged_album  = tags['TALB'].text[0]
+    tagged_genres = tags['TCON'].text[0]
+    tagged_title  = tags['TIT2'].text[0]
+    tagged_label  = tags['TPUB'].text[0]
+    if not tagged_artist == track.artist:
+        generalMismatches.append(f'artist: (old) {tagged_artist} => (new) {track.artist}')
+    if not tagged_album == copy.release.title_with_catno(copy):
+        generalMismatches.append(f'album: (old) {tagged_album} => (new) {copy.release.title_with_catno(copy)}')
+    if not tagged_genres == copy.release.genres[0]:
+        generalMismatches.append(f'genre: (old) {tagged_genres} => (new) {copy.release.genres[0]}')
+    if not tagged_title == track.title:
+        generalMismatches.append(f'title: (old) {tagged_title} => (new) {track.title}')
+    if not tagged_label == copy.release.label:
+        generalMismatches.append(f'label: (old) {tagged_label} => (new) {copy.release.label}')
+
+    if len(generalMismatches) > 0:
+        mlist = ', '.join(generalMismatches)
+        errors.append(f'   Track {track.position} needs retag:')
+        for m in generalMismatches:
+            errors.append(f'      {m}')
+    else:
+        if not tags_verify_comments:
+            errors.append(f'   Track {track.position} needs reloc.')
+
+    return errors
+
+def tags_verify_comments(copy, track, tags):
+    comment_tags = tags.getall('COMM')
+    comment_tag_text = track.id3_comment(copy)
+
+    correct = True
+    if len(comment_tags) != 2:
+        correct = False
+    else:
+        for comment_tag in comment_tags:
+            if len(comment_tag.text) != 1:
+                correct = False
+            else:
+                if comment_tag.desc == 'ID3v1 Comment': # ID3 V1 comment is only 28 bytes long.
+                    if comment_tag.text[0][0:27] != comment_tag_text[0:27]:
+                        correct = False
+                else:
+                    if comment_tag.text[0] != comment_tag_text:
+                        correct = False
+
+    return correct
+
 def tags_set_comments(copy, track, tags):
     tags.delall('COMM')
     tags['COMM'] = COMM(encoding=3, lang='eng', text=track.id3_comment(copy))

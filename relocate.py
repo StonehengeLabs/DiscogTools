@@ -33,23 +33,11 @@ for copy in collection.copies:
                 mp3_file_path = os.path.join(dir_path_vinyl, track.mp3_filename(copy))
                 tags = ID3()
                 tags.load(mp3_file_path, translate = False)
-                comment_tags = tags.getall('COMM')
-                comment_tag_text = track.id3_comment(copy)
-                adjust = False
-                if len(comment_tags) != 2:
-                    adjust = True
-                else:
-                    for comment_tag in comment_tags:
-                        if len(comment_tag.text) != 1:
-                            adjust = True
-                        else:
-                            if comment_tag.desc == 'ID3v1 Comment': # ID3 V1 comment is only 28 bytes long.
-                                if comment_tag.text[0][0:27] != comment_tag_text[0:27]:
-                                    adjust = True
-                            else:
-                                if comment_tag.text[0] != comment_tag_text:
-                                    adjust = True
-                if adjust:
+                correct = tags_verify_comments(copy, track, tags)
+                if not correct:
+                    comment_tags = tags.getall('COMM')
+                    comment_tag_text = track.id3_comment(copy)
+
                     command = 'f'
                     if not fix_all_copy:
                         print('')
