@@ -76,6 +76,10 @@ def rematch(release_id):
         tags.save()
 
     if renamed:
+        # If at least one file was renamed, we remove all old MP3 files from the vinyl path.
+        for filename_current in track_filenames_current:
+            os.remove(os.path.join(dir_path_vinyl, filename_current))
+
         # Now we must adjust the .jpg and .wav file names as well.
         print('\nSources as well...')
         src_filenames_current, src_filenames_corrected = [], []
