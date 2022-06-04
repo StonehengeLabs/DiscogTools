@@ -1,4 +1,5 @@
 import os
+import sys
 
 from env import *
 from tags import *
@@ -9,6 +10,8 @@ from djcase import DjCase
 
 # pip install mutagen
 from mutagen.id3 import ID3
+
+sys.stdout.reconfigure(encoding='utf-8')
 
 collection = Collection(file_path_collection_json)
 djcase = DjCase(dir_path_vinyl)
