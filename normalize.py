@@ -47,6 +47,7 @@ def NormalizeFileBaseName(name):
    name = name.replace("Ω", "Ohm") # For release 892555.
    name = name.replace("•", ".") # For release 5550.
    name = name.replace("™", "(TM)") # For release 83942.
+   name = name.replace("λ Lambda", "Lambda") # For release 78685.
    name = name.replace("フォーテック", "Photek") # For release 309.
    name = name.replace("七人の侍", "The Seven Samurai") # For release 309.
    name = name.replace("複合", "Complex") # For release 309.
