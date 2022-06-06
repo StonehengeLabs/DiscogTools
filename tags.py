@@ -6,7 +6,30 @@ from mutagen.id3 import TALB
 from mutagen.id3 import TCON
 from mutagen.id3 import TIT2
 from mutagen.id3 import TPUB
-from mutagen.id3 import TYER
+from mutagen.id3 import TDRC
+
+def tags_load(filepath):
+    tags = ID3() # https://mutagen.readthedocs.io/en/latest/api/id3.html#mutagen.id3.ID3Tags
+    tags.load(filepath, translate = True, v2_version = 4, load_v1 = False)
+    return tags
+
+def tags_save(tags):
+
+    # If we just load and save tags, the id3v1 comment is lost for whatever reason.
+    # Workaround: get comment text and reassign it to tags. This seems to make mutagen
+    # keep the comment in the id3v1 as well.
+    comment_tags = tags.getall('COMM')
+    text = None
+
+    for comment_tag in comment_tags:
+        if len(comment_tag.text) == 1:
+            if not comment_tag.desc == 'ID3v1 Comment':
+                text = comment_tag.text[0]
+
+    tags.delall('COMM')
+    tags['COMM'] = COMM(encoding=3, lang='eng', text=text)
+
+    tags.save()
 
 def tags_set_all(copy, track, tags):
     tags['TPE1'] = TPE1(encoding=3, text=track.artist)
@@ -16,7 +39,7 @@ def tags_set_all(copy, track, tags):
     tags['TPUB'] = TPUB(encoding=3, text=copy.release.label)
 
     if not copy.release.year == None:
-        tags['TYER'] = TYER(encoding=3, text=copy.release.year)
+        tags['TDRC'] = TDRC(encoding=3, text=copy.release.year)
 
     tags_set_comments(copy, track, tags)
 
@@ -58,26 +81,22 @@ def tags_verify_comments(copy, track, tags):
     comment_tag_text = track.id3_comment(copy)
 
     correct = True
-    if len(comment_tags) != 2:
-        correct = False
-    else:
-        for comment_tag in comment_tags:
-            if len(comment_tag.text) != 1:
-                correct = False
+    for comment_tag in comment_tags:
+        if len(comment_tag.text) != 1:
+            correct = False
+        else:
+            if comment_tag.desc == 'ID3v1 Comment': # ID3 V1 comment is only 28 bytes long.
+                if comment_tag.text[0][0:27] != comment_tag_text[0:27]:
+                    correct = False
             else:
-                if comment_tag.desc == 'ID3v1 Comment': # ID3 V1 comment is only 28 bytes long.
-                    if comment_tag.text[0][0:27] != comment_tag_text[0:27]:
-                        correct = False
-                else:
-                    if comment_tag.text[0] != comment_tag_text:
-                        correct = False
+                if comment_tag.text[0] != comment_tag_text:
+                    correct = False
 
     return correct
 
 def tags_set_comments(copy, track, tags):
     tags.delall('COMM')
     tags['COMM'] = COMM(encoding=3, lang='eng', text=track.id3_comment(copy))
-    # tags['COMM'] = COMM(encoding=3, lang='eng', text='HOHOHOHO')
 
 def tags_normalize_serato(tags):
     tags_normalize_playcount(tags)

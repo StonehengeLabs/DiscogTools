@@ -5,7 +5,6 @@ import shutil
 
 from collection import Collection
 from djcase import DjCase
-from mp3file import Mp3File
 from filematcher import FileMatcher
 
 from env import *
@@ -66,14 +65,13 @@ def rematch(release_id):
             renamed = True
 
         # https://mutagen.readthedocs.io/en/latest/api/id3.html#mutagen.id3.ID3Tags
-        tags = ID3()
-        tags.load(filepath_corrected, translate = False)
+        tags = tags_load(filepath_corrected)
         #print('--------------')
         #print(tags.pprint())
         #print('--------------')
 
         tags_set_all(copy, track, tags)
-        tags.save()
+        tags_save(tags)
 
     if renamed:
         # If at least one file was renamed, we remove all old MP3 files from the vinyl path.

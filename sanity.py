@@ -32,8 +32,7 @@ for copy in collection.copies:
                 mp3_filenames.remove(mp3_filename)
                 # print(track.mp3_filename(copy))
                 mp3_file_path = os.path.join(dir_path_vinyl, mp3_filename)
-                tags = ID3()
-                tags.load(mp3_file_path, translate = False)
+                tags = tags_load(mp3_file_path)
                 errors = errors + tags_verify(copy, track, tags)
 
             else:

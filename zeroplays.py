@@ -7,10 +7,6 @@ from djcase import DjCase
 from env import *
 from tags import *
 
-# pip install mutagen
-from mutagen.id3 import ID3
-from mutagen.id3 import GEOB
-
 def md5(fname): # https://stackoverflow.com/questions/3431825/generating-an-md5-checksum-of-a-file
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
@@ -47,8 +43,7 @@ for filepath in djcase.mp3_filepaths():
     sns_lastmod = mp3states[filepath]['last_modified']
 
     if just_added or (now_lastmod != sns_lastmod):
-        tags = ID3() # https://mutagen.readthedocs.io/en/latest/api/id3.html#mutagen.id3.ID3Tags
-        tags.load(filepath, translate = False)
+        tags = tags_load(filepath)
         mod = False
         if tags_normalize_playcount(tags):
             operations.append('playcount')
@@ -57,7 +52,7 @@ for filepath in djcase.mp3_filepaths():
             operations.append('beatgrid')
             mod = True
         if mod:
-            tags.save()
+            tags_save(tags)
 
     # Stage 3: reset timestamp if applicable...
 

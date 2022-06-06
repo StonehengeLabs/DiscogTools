@@ -31,8 +31,7 @@ for copy in collection.copies:
         for track in copy.recorded_tracks:
             if not skip_copy:
                 mp3_file_path = os.path.join(dir_path_vinyl, track.mp3_filename(copy))
-                tags = ID3()
-                tags.load(mp3_file_path, translate = False)
+                tags = tags_load(mp3_file_path)
                 correct = tags_verify_comments(copy, track, tags)
                 if not correct:
                     comment_tags = tags.getall('COMM')
@@ -54,5 +53,5 @@ for copy in collection.copies:
                     if command == 'f':
                         tags_set_comments(copy, track, tags)
                         tags_normalize_serato(tags)
-                        tags.save()
+                        tags_save(tags)
                         print(track.mp3_filename(copy) + ": comments")
