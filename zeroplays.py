@@ -34,7 +34,7 @@ for filepath in djcase.mp3_filepaths():
         now_lastmod = os.path.getmtime(filepath)
         now_checksum = md5(filepath)
         mp3states[filepath] = { 'last_modified': now_lastmod, 'checksum_md5': now_checksum }
-        operations.append('add')
+        operations.append('A')
         just_added = True
 
     # Stage 2: reset tags if applicable...
@@ -46,10 +46,10 @@ for filepath in djcase.mp3_filepaths():
         tags = tags_load(filepath)
         mod = False
         if tags_normalize_playcount(tags):
-            operations.append('playcount')
+            operations.append('C')
             mod = True
         if tags_normalize_beatgrid(tags):
-            operations.append('beatgrid')
+            operations.append('G')
             mod = True
         if mod:
             tags_save(tags)
@@ -65,14 +65,18 @@ for filepath in djcase.mp3_filepaths():
 
         if now_checksum == sns_checksum:
             os.utime(filepath, (sns_lastmod, sns_lastmod))
-            operations.append('touch')
+            operations.append('T')
         else:
             mp3states[filepath] = { 'last_modified': now_lastmod, 'checksum_md5': now_checksum }
-            operations.append('update')
+            operations.append('U')
 
     # Output...
     if len(operations) > 0:
-        print(f'{os.path.basename(filepath)}: {", ".join(operations)}')
+        operations_aligned = ''
+        for op in ('A', 'G', 'C', 'U', 'T'):
+            pos = op if op in operations else '-'
+            operations_aligned = operations_aligned + pos
+        print(f'{operations_aligned} {os.path.basename(filepath)}')
 
 with open(file_path_mp3states_json, 'w') as json_file:
     json.dump(mp3states, json_file, indent=4, sort_keys=True)
