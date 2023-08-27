@@ -12,6 +12,8 @@ from mutagen.id3 import ID3
 collection = Collection(file_path_collection_json)
 djcase = DjCase(dir_path_vinyl)
 
+fix_all_global = False
+
 for copy in collection.copies:
     # print(copy.formatted())
 
@@ -27,7 +29,7 @@ for copy in collection.copies:
     #    print("   => Skipped due to structural mismatch.")
     #else:
     if complete:
-        skip_copy, fix_all_copy = False, False
+        skip_copy, fix_all_copy = False, fix_all_global
         for track in copy.recorded_tracks:
             if not skip_copy:
                 mp3_file_path = os.path.join(dir_path_vinyl, track.mp3_filename(copy))
@@ -44,10 +46,13 @@ for copy in collection.copies:
                         for comment_tag in comment_tags:
                             print("      - {0:<15}".format(comment_tag.desc) + comment_tag.text[0])
                         print("      - {0:<15}".format('Expected') + comment_tag_text)
-                        command = input('\ns to skip whole copy; f to fix this track; enter to fix all copy\'s tracks: ')
+                        command = input('\ns to skip whole copy; f to fix this track; enter to fix all copy\'s tracks, e to fix everything: ')
                     if command == 's':
                         skip_copy = True
-                    elif command == '':
+                    if command == 'e':
+                        fix_all_global = True
+                        command = ''
+                    if command == '':
                         fix_all_copy = True
                         command = 'f'
                     if command == 'f':
