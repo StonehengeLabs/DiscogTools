@@ -4,7 +4,6 @@ import os
 import shutil
 
 from collection import Collection
-from djcase import DjCase
 from filematcher import FileMatcher
 
 from env import *
@@ -16,7 +15,6 @@ from mutagen.id3 import ID3
 def rematch(release_id):
 
     collection = Collection(file_path_collection_json)
-    djcase = DjCase(dir_path_vinyl)
 
     copies = collection.copies_by_release_id(release_id)
 
@@ -73,12 +71,12 @@ def rematch(release_id):
         tags_set_all(copy, track, tags)
         tags_save(tags)
 
-    if renamed:
-        # If at least one file was renamed, we remove all old MP3 files from the vinyl path.
-        for filename_current in track_filenames_current:
-            os.remove(os.path.join(dir_path_vinyl, filename_current))
+    # We remove all old MP3 files from the vinyl path, even if no file was renamed. This is for uniorm handling of retagged files.
+    for filename_current in track_filenames_current:
+        os.remove(os.path.join(dir_path_vinyl, filename_current))
 
-        # Now we must adjust the .jpg and .wav file names as well.
+    if renamed:
+        # If at least one file was renamed, we must adjust the .jpg and .wav file names as well.
         print('\nSources as well...')
         src_filenames_current, src_filenames_corrected = [], []
         release_id = copy.release.id # Release ID is considered to be unchanged.
