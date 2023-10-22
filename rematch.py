@@ -2,6 +2,7 @@ import sys
 import re
 import os
 import shutil
+from subprocess import Popen, PIPE
 
 from collection import Collection
 from filematcher import FileMatcher
@@ -78,6 +79,26 @@ def rematch(release_id):
     if renamed:
         # If at least one file was renamed, we must adjust the .jpg and .wav file names as well.
         print('\nSources as well...')
+
+        matcher = FileMatcher(copy.release.id, "Archive", [ copy.rar_filename() ], dir_path_source_archives, '*.rar', True)
+        renamed, rar_filenames = matcher.select()
+        if len(rar_filenames) == 1:
+            try:
+                print(f'Moving {rar_filenames[0]} from {dir_path_source_archives}...')
+                shutil.move(os.path.join(dir_path_source_archives, rar_filenames[0]), os.path.join(dir_path_work, rar_filenames[0]))
+                if os.path.isfile(unrar_exe_path):
+                    print(f'Locally unpacking {rar_filenames[0]}...')
+                    process = Popen( [ unrar_exe_path, 'x', rar_filenames[0] ], cwd = dir_path_work, stdout=PIPE, stderr=PIPE)
+                    process.communicate()
+                    if process.returncode == 0:
+                        os.rename(os.path.join(dir_path_work, rar_filenames[0]), os.path.join(dir_path_work, 'TRASH_' + rar_filenames[0]))
+                    else:
+                        print('Error unpacking archive.')
+                else:
+                    print('UnRAR executable not found; please extract manually.')
+            except:
+                print(f'Failed to move archive.')
+
         src_filenames_current, src_filenames_corrected = [], []
         release_id = copy.release.id # Release ID is considered to be unchanged.
 

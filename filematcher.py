@@ -10,12 +10,13 @@ import webbrowser
 
 class FileMatcher:
 
-    def __init__(self, release_id, cat_string, filenames_to_be, glob_path, glob_pattern):
+    def __init__(self, release_id, cat_string, filenames_to_be, glob_path, glob_pattern, may_skip = False):
         self.release_id = release_id
         self.cat_string = cat_string
         self.filenames_to_be = filenames_to_be
         self.glob_path = glob_path
         self.glob_pattern = glob_pattern
+        self.may_skip = may_skip
 
     def select(self):
         filenames_candidates = []
@@ -40,7 +41,10 @@ class FileMatcher:
                 size = int(os.path.getsize(os.path.join(self.glob_path, filenames_candidates[i])) / 1024 / 1024)
                 print(f'({i + 1}) {filenames_candidates[i]} ({size}MB)')
 
-            command = input('\nEnter track number to move a track to top; + to add candidates; r to rescan; b to browse; enter to confirm: ')
+            may_skip_clause = ''
+            if self.may_skip:
+                may_skip_clause = 'x to skip; '
+            command = input(f'\nEnter number to move track to top; + to add candidates; r to rescan; b to browse; {may_skip_clause}enter to confirm: ')
             if re.match('\d+', command):
                 index = int(command) - 1
                 if index > 0 or index < len(filenames_candidates):
@@ -60,6 +64,9 @@ class FileMatcher:
 
             elif command == '':
                 break
+                
+            elif command == 'x' and self.may_skip:
+                return [ False, [] ]
 
         return [ renamed, filenames_candidates[:len(self.filenames_to_be)] ]
 
