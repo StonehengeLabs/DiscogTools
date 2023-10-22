@@ -24,10 +24,12 @@ def normalize_title(title):
    title = title.replace("複合", "Complex") # For release 309.
    return title
 
-def normalize_catno(catno):
+def normalize_catno(catno, release_id):
    catno = catno.replace("П", "_")
    catno = catno.replace("•", ".")
    catno = catno.replace("₂", "2")
+   if catno == 'none':
+      catno = 'r-' + str(release_id) # Generating a pseudo cat no from the discogs release ID; anything is better than "none".
    return catno
 
 def NormalizeFileBaseName(name):
