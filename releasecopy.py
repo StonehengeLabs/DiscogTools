@@ -20,6 +20,9 @@ class Copy:
         if self.copynote:
             self.copynote_string_component = ' ' + self.copynote
 
+    def rar_filename(self):
+        return f'{self.release.id} {self.release.title_with_catno(self)} - {self.release.artist}.rar'
+
     def formatted(self):
         return f'{self.release.formatted()}\n   {self.copynote} / {self.folder} / {self.fullnote}'
 

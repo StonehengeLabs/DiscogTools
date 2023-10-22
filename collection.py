@@ -3,7 +3,7 @@ import json
 
 from release import Release
 from track import Track
-from copy import Copy
+from releasecopy import Copy
 
 class Collection:
 

@@ -1,5 +1,5 @@
 from normalize import *
-from copy import Copy
+from releasecopy import Copy
 
 class Track:
 
