@@ -1,6 +1,7 @@
 from normalize import *
 from releasecopy import Copy
 
+from datetime import date # Temporary
 class Track:
 
     def __init__(self, release, artist, position, title):
@@ -11,6 +12,7 @@ class Track:
             self.artist = release.artist
         self.position = position
         self.title = normalize_title(title)
+        self.title_with_position = self.title + ' [' + self.position + ']'
 
     def wav_filename(self, copy):
         catext = ''

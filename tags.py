@@ -35,7 +35,7 @@ def tags_set_all(copy, track, tags):
     tags['TPE1'] = TPE1(encoding=3, text=track.artist)
     tags['TALB'] = TALB(encoding=3, text=copy.release.title_with_catno(copy))
     tags['TCON'] = TCON(encoding=3, text=copy.release.genres[0])
-    tags['TIT2'] = TIT2(encoding=3, text=track.title)
+    tags['TIT2'] = TIT2(encoding=3, text=track.title_with_position)
     tags['TPUB'] = TPUB(encoding=3, text=copy.release.label)
 
     if not copy.release.year == None:
@@ -60,8 +60,8 @@ def tags_verify(copy, track, tags):
         generalMismatches.append(f'album: (old) {tagged_album} => (new) {copy.release.title_with_catno(copy)}')
     if not tagged_genres == copy.release.genres[0]:
         generalMismatches.append(f'genre: (old) {tagged_genres} => (new) {copy.release.genres[0]}')
-    if not tagged_title == track.title:
-        generalMismatches.append(f'title: (old) {tagged_title} => (new) {track.title}')
+    if not tagged_title == track.title_with_position:
+        generalMismatches.append(f'title: (old) {tagged_title} => (new) {track.title_with_position}')
     if not tagged_label == copy.release.label:
         generalMismatches.append(f'label: (old) {tagged_label} => (new) {copy.release.label}')
 
