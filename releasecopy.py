@@ -9,7 +9,7 @@ class Copy:
         self.unrecorded_tracks = []
         for track in release.tracks:
             if fullnote:
-                if re.match('.*\{-' + track.position + '\}.*', fullnote):
+                if re.match('.*\{-' + re.escape(track.position) + '\}.*', fullnote, re.MULTILINE | re.DOTALL):
                     self.unrecorded_tracks.append(track)
                 else:
                     self.recorded_tracks.append(track)
