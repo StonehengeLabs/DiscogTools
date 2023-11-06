@@ -45,6 +45,9 @@ def tags_set_all(copy, track, tags):
 
     tags_normalize_serato(tags)
 
+def tags_get_album(tags):
+    return tags['TALB'].text[0]
+
 def tags_verify(copy, track, tags):
     errors = []
 

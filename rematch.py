@@ -69,6 +69,9 @@ def rematch(release_id):
         #print(tags.pprint())
         #print('--------------')
 
+        if not tags_get_album(tags) == copy.release.title_with_catno(copy):
+            renamed = True # If the album title has changed, we must rename files in the sources as well - note that the mp3s are NOT renamed in this case, therefore extra check here.
+
         tags_set_all(copy, track, tags)
         tags_save(tags)
 
