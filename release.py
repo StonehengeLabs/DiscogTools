@@ -12,17 +12,23 @@ class Release:
     def formatted(self):
         return f'{self.id} {self.catno} "{self.artist}" - "{self.title}"'
 
-    def title_with_catno(self, copy):
+    def title_with_catno(self, appendix = ""):
         title_and_catno = ''
-        if len(copy.release.title) == 0:
-            title_and_catno = copy.release.catno
+        if len(self.title) == 0:
+            title_and_catno = self.catno
         else:
-            title_and_catno = copy.release.title
-        if len(copy.release.catno) > 0:
-            title_and_catno = title_and_catno + " (" + copy.release.catno + ")"
-        if len (title_and_catno) == 0:
+            title_and_catno = self.title
+        if len(self.catno) > 0:
+            title_and_catno = title_and_catno + " (" + self.catno + ")"
+        if len(title_and_catno) == 0:
             title_and_catno = "Unknown"
+        if len(appendix) > 0:
+            title_and_catno = title_and_catno + ", " + appendix
         return title_and_catno
+
+    def matches_title_with_catno(self, candidate):
+        title_and_catno = self.title_with_catno()
+        return candidate.startswith(title_and_catno)
 
     def img_filename(self, copy, ext = 'jpg'):
         catext = ''

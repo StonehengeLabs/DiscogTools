@@ -57,6 +57,8 @@ for copy in collection.copies:
                         command = 'f'
                     if command == 'f':
                         tags_set_comments(copy, track, tags)
+                        tags_set_album(copy, track, tags) # Folder is currently in TALB as well.
                         tags_normalize_serato(tags)
                         tags_save(tags)
                         print(track.mp3_filename(copy) + ": comments")
+                        print(track.mp3_filename(copy) + ": album")

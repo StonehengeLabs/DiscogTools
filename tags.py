@@ -33,7 +33,6 @@ def tags_save(tags):
 
 def tags_set_all(copy, track, tags):
     tags['TPE1'] = TPE1(encoding=3, text=track.artist)
-    tags['TALB'] = TALB(encoding=3, text=copy.release.title_with_catno(copy))
     tags['TCON'] = TCON(encoding=3, text=copy.release.genres[0])
     tags['TIT2'] = TIT2(encoding=3, text=track.title_with_position)
     tags['TPUB'] = TPUB(encoding=3, text=copy.release.label)
@@ -41,6 +40,7 @@ def tags_set_all(copy, track, tags):
     if not copy.release.year == None:
         tags['TDRC'] = TDRC(encoding=3, text=copy.release.year)
 
+    tags_set_album(copy, track, tags)
     tags_set_comments(copy, track, tags)
 
     tags_normalize_serato(tags)
@@ -59,8 +59,8 @@ def tags_verify(copy, track, tags):
     tagged_label  = tags['TPUB'].text[0]
     if not tagged_artist == track.artist:
         generalMismatches.append(f'artist: (old) {tagged_artist} => (new) {track.artist}')
-    if not tagged_album == copy.release.title_with_catno(copy):
-        generalMismatches.append(f'album: (old) {tagged_album} => (new) {copy.release.title_with_catno(copy)}')
+    if not tagged_album == copy.title_with_catno_and_short_folder():
+        generalMismatches.append(f'album: (old) {tagged_album} => (new) {copy.title_with_catno_and_short_folder()}')
     if not tagged_genres == copy.release.genres[0]:
         generalMismatches.append(f'genre: (old) {tagged_genres} => (new) {copy.release.genres[0]}')
     if not tagged_title == track.title_with_position:
@@ -74,7 +74,7 @@ def tags_verify(copy, track, tags):
         for m in generalMismatches:
             errors.append(f'      {m}')
     else:
-        if not tags_verify_comments:
+        if not tags_verify_comments(copy, track, tags):
             errors.append(f'   Track {track.position} needs reloc.')
 
     return errors
@@ -100,6 +100,9 @@ def tags_verify_comments(copy, track, tags):
 def tags_set_comments(copy, track, tags):
     tags.delall('COMM')
     tags['COMM'] = COMM(encoding=3, lang='eng', text=track.id3_comment(copy))
+
+def tags_set_album(copy, track, tags):
+    tags['TALB'] = TALB(encoding=3, text=copy.title_with_catno_and_short_folder())
 
 def tags_normalize_serato(tags):
     tags_normalize_playcount(tags)
