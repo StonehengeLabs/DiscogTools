@@ -28,6 +28,7 @@ def normalize_catno(catno, release_id):
    catno = catno.replace("П", "_")
    catno = catno.replace("•", ".")
    catno = catno.replace("₂", "2")
+   catno = catno.replace('"', "")
    if catno == 'none':
       catno = 'r-' + str(release_id) # Generating a pseudo cat no from the discogs release ID; anything is better than "none".
    return catno
