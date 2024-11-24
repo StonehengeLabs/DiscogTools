@@ -2,7 +2,7 @@ import re
 
 def normalize_artist(artist):
    if artist:
-      artist = re.sub('\s\(\d+\)', "", artist) # This removes discogs indices. May be subject to discussion.
+      artist = re.sub(r'\s\(\d+\)', "", artist) # This removes discogs indices. May be subject to discussion.
       artist = artist.strip()
       artist = artist.replace(" / ", ", ")
       artist = artist.replace("ā", "a") # For Prānā - boundless EP. This is not in the Latin-1 space.
